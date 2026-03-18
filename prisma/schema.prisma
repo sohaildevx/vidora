@@ -24,6 +24,9 @@ model Video {
   hasSubtitles   Boolean  @default(false)
   subtitleFormat String?
   userId         String
+  reelPublicId   String?
+  reelUrl        String?
+  hasReel        Boolean @default(false)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   
