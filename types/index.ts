@@ -9,6 +9,9 @@ export interface Video {
     subtitles?: string | null;
     hasSubtitles?: boolean;
     subtitleFormat?: string | null;
+    reelPublicId?: string | null;
+    reelUrl?: string | null;
+    hasReel?: boolean;
     createdAt: Date;
     updatedAt: Date;
 }
