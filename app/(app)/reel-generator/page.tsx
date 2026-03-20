@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import axios from 'axios'
 import { ShowToast } from '@/components/toast';
 import { Video } from '@/types';
@@ -13,6 +13,7 @@ const ReelGeneratorPage = () => {
   const [selectedVideoId, setSelectedVideoId] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [reelUrl, setReelUrl] = useState<string | null>(null);
+  const resultRef = useRef<HTMLDivElement>(null);
 
   const fetchVideos = useCallback(async () => {
     try {
@@ -51,6 +52,9 @@ const ReelGeneratorPage = () => {
       if (response.data.success) {
         setReelUrl(response.data.reelUrl);
         ShowToast('Reel generated successfully!', 'success');
+        setTimeout(() => {
+          resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
       }
     } catch (error) {
       const errorMessage = axios.isAxiosError(error) && error.response?.data?.error
@@ -147,7 +151,7 @@ const ReelGeneratorPage = () => {
 
           
           {reelUrl && (
-            <div className="space-y-4 pt-4 border-t border-base-300">
+            <div ref={resultRef} className="space-y-4 pt-4 border-t border-base-300">
               <h2 className="font-bold text-lg">Your Reel is Ready!</h2>
               <div className="flex justify-center">
                 <video

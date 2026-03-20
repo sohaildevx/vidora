@@ -88,23 +88,42 @@ export async function POST(request: NextRequest) {
       });
       const raw = gptResponse.choices[0].message.content!;
       const cleaned = raw.replace(/```json/g, '').replace(/```/g, '').trim();
-      const { start, end } = JSON.parse(cleaned);
+      const parsed = JSON.parse(cleaned);
+      const start = Math.round(parsed.start * 10) / 10;
+      const end = Math.round(parsed.end * 10) / 10;
 
 
       const result = await cloudinary.uploader.explicit(publicId, {
         type: "upload",
         resource_type: "video",
         eager: [{
-         raw_transformation: `so_${start},eo_${end}/ar_9:16,c_fill,g_auto/q_auto:low,f_mp4`,
+          raw_transformation: `so_${start},eo_${end}/ar_9:16,c_fill,g_auto/q_auto:low,f_mp4`,
           format: "mp4"
         }],
         eager_async: false
       });
-      const reelUrl = result.eager[0].secure_url;
+
+      const reelUrl = cloudinary.url(publicId, {
+        resource_type: "video",
+        transformation: [
+          { start_offset: `${start}`, end_offset: `${end}` },
+          { aspect_ratio: "9:16", crop: "fill", gravity: "auto" },
+          { quality: "auto:low", fetch_format: "mp4" },
+        ],
+        sign_url: true,
+        secure: true,
+      });
+
+      if (!reelUrl) {
+        return NextResponse.json(
+          { error: "Failed to get reel URL from Cloudinary." },
+          { status: 500 }
+        );
+      }
 
       await prisma.video.update({
         where: { id: videoId },
-        data: { reelUrl, reelPublicId: result.eager[0].public_id, hasReel: true }
+        data: { reelUrl, reelPublicId: publicId, hasReel: true }
       });
       return NextResponse.json({ success: true, reelUrl });
   
