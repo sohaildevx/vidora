@@ -10,9 +10,8 @@ export default function Home() {
             Vidora
           </Link>
           <nav className="hidden md:flex gap-8 text-sm text-white/70">
-            <a href="#work" className="hover:text-white transition-colors duration-300">What we do</a>
-            <a href="#process" className="hover:text-white transition-colors duration-300">Process</a>
-            <a href="#about" className="hover:text-white transition-colors duration-300">About</a>
+            <a href="#features" className="hover:text-white transition-colors duration-300">Features</a>
+            <a href="#process" className="hover:text-white transition-colors duration-300">How it works</a>
           </nav>
           <div className="flex items-center gap-3 sm:gap-5">
             <Link href="/sign-in" className="text-xs sm:text-sm text-white/70 hover:text-white transition-colors duration-300">
@@ -32,7 +31,7 @@ export default function Home() {
       <section className="min-h-[60vh] sm:min-h-[70vh] md:min-h-[85vh] flex flex-col justify-center pb-10 sm:pb-16 md:pb-20 pt-20 sm:pt-24 px-4 sm:px-6 md:px-10 max-w-[1400px] mx-auto">
         <div className="mb-6 sm:mb-8 md:mb-12">
           <p className="text-white/60 text-xs sm:text-sm tracking-wide mb-4 sm:mb-6 md:mb-8">
-            Video &middot; Images &middot; AI &middot; Subtitles
+            Video &middot; Images &middot; AI &middot; Subtitles &middot; Reel Generator
           </p>
           <h1 className="text-[clamp(2rem,8vw,7rem)] font-bold leading-[0.95] tracking-tight max-w-5xl">
             Your media,
@@ -42,9 +41,8 @@ export default function Home() {
         </div>
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 sm:gap-8 md:gap-10 border-t border-white/15 pt-6 sm:pt-8 md:pt-10">
           <p className="text-white/70 max-w-md text-sm sm:text-[15px] leading-relaxed">
-            We built the tool we wished existed — upload a video, get subtitles
-            in seconds, resize for any platform, and share it everywhere. No
-            fluff. No 47-step workflow.
+            Upload a video, get subtitles in seconds, turn any clip into a
+            vertical reel, and share it everywhere. One tool, zero fluff.
           </p>
           <Link
             href="/sign-up"
@@ -67,13 +65,13 @@ export default function Home() {
               <span>•</span>
               <span>AI Subtitles</span>
               <span>•</span>
-              <span>Social Formats</span>
+              <span>AI Reel Generator</span>
               <span>•</span>
-              <span>Image Transform</span>
-              <span>•</span>
-              <span>Batch Processing</span>
+              <span>Social Share</span>
               <span>•</span>
               <span>Cloud Storage</span>
+              <span>•</span>
+              <span>Cloudinary Powered</span>
               <span>•</span>
             </div>
           ))}
@@ -81,14 +79,14 @@ export default function Home() {
       </div>
 
       
-      <section id="work" className="py-16 sm:py-24 md:py-32 px-4 sm:px-6 md:px-10 max-w-[1400px] mx-auto">
+      <section id="features" className="py-16 sm:py-24 md:py-32 px-4 sm:px-6 md:px-10 max-w-[1400px] mx-auto">
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 sm:gap-6 mb-10 sm:mb-16 md:mb-20">
           <h2 className="text-[12px] sm:text-[13px] uppercase tracking-[0.15em] text-white/60">
-            What we do
+            Features
           </h2>
           <p className="text-white/70 max-w-lg text-sm sm:text-[15px] leading-relaxed">
-            Four things. We do them well. No feature bloat, no enterprise
-            upsells, no &ldquo;contact sales&rdquo; buttons.
+            Everything you need to go from raw footage to publish-ready
+            content &mdash; no extra tools, no context-switching.
           </p>
         </div>
 
@@ -100,8 +98,8 @@ export default function Home() {
               Video Upload
             </h3>
             <p className="text-white/60 text-sm sm:text-[15px] leading-relaxed max-w-sm">
-              Upload videos up to 100MB. Automatic Cloudinary storage with
-              optimization and format conversion built-in.
+              Drag-and-drop videos up to 100 MB. Files land in Cloudinary
+              with automatic format optimization &mdash; no config needed.
             </p>
             <div className="mt-6 sm:mt-8 w-full h-[1px] bg-gradient-to-r from-white/15 to-transparent" />
           </div>
@@ -113,21 +111,28 @@ export default function Home() {
               AI Subtitles
             </h3>
             <p className="text-white/60 text-sm sm:text-[15px] leading-relaxed max-w-sm">
-              OpenAI Whisper integration generates accurate subtitles from video
-              audio. Download as SRT or burn directly into video.
+              One click, accurate captions. Powered by OpenAI Whisper &mdash;
+              generates time-coded VTT subtitles you can download or preview
+              instantly.
             </p>
             <div className="mt-6 sm:mt-8 w-full h-[1px] bg-gradient-to-r from-white/15 to-transparent" />
           </div>
 
           
           <div className="bg-white/[0.03] border border-white/15 rounded-xl sm:rounded-2xl p-6 sm:p-8 md:p-10 hover:border-white/30 hover:bg-white/[0.06] transition-all duration-500 group">
-            <span className="text-white/40 text-[12px] sm:text-[13px] tracking-wider font-mono">03</span>
+            <div className="flex items-center gap-3">
+              <span className="text-white/40 text-[12px] sm:text-[13px] tracking-wider font-mono">03</span>
+              <span className="text-[10px] sm:text-[11px] uppercase tracking-[0.15em] text-white bg-white/10 border border-white/20 rounded-full px-2.5 py-0.5">
+                New
+              </span>
+            </div>
             <h3 className="text-xl sm:text-2xl md:text-3xl font-semibold mt-4 sm:mt-6 mb-3 sm:mb-4 text-white">
-              Social Formats
+              AI Reel Generator
             </h3>
             <p className="text-white/60 text-sm sm:text-[15px] leading-relaxed max-w-sm">
-              Generate shareable links for your processed videos. Optimized
-              previews and easy embedding for social platforms.
+              Feed it a long video and AI picks the most engaging segment,
+              crops to 9:16, and hands you a download-ready short for
+              TikTok, Reels, or YouTube Shorts.
             </p>
             <div className="mt-6 sm:mt-8 w-full h-[1px] bg-gradient-to-r from-white/15 to-transparent" />
           </div>
@@ -136,11 +141,11 @@ export default function Home() {
           <div className="bg-white/[0.03] border border-white/15 rounded-xl sm:rounded-2xl p-6 sm:p-8 md:p-10 sm:mt-16 hover:border-white/30 hover:bg-white/[0.06] transition-all duration-500 group">
             <span className="text-white/40 text-[12px] sm:text-[13px] tracking-wider font-mono">04</span>
             <h3 className="text-xl sm:text-2xl md:text-3xl font-semibold mt-4 sm:mt-6 mb-3 sm:mb-4 text-white">
-              Image Transform
+              Social Share
             </h3>
             <p className="text-white/60 text-sm sm:text-[15px] leading-relaxed max-w-sm">
-              Upload and transform images with Cloudinary. Automatic format
-              detection, optimization, and cloud-based storage.
+              Resize images to every major platform ratio in one step.
+              Preview the result, grab the optimized link, and post.
             </p>
             <div className="mt-6 sm:mt-8 w-full h-[1px] bg-gradient-to-r from-white/15 to-transparent" />
           </div>
@@ -150,24 +155,24 @@ export default function Home() {
       
       <section id="process" className="border-t border-white/10 py-16 sm:py-24 md:py-32 px-4 sm:px-6 md:px-10 max-w-[1400px] mx-auto">
         <h2 className="text-[12px] sm:text-[13px] uppercase tracking-[0.15em] text-white/80 mb-10 sm:mb-16 md:mb-20">
-          Process
+          How it works
         </h2>
         <div className="space-y-0">
           {[
             {
               num: "01",
-              title: "Upload your media",
-              desc: "Drag and drop videos (up to 100MB) or images. Instant Cloudinary storage.",
+              title: "Upload your video",
+              desc: "Drag and drop any video up to 100 MB. It lands in your cloud library instantly.",
             },
             {
               num: "02",
-              title: "AI processes automatically",
-              desc: "Generate subtitles with OpenAI Whisper, optimize formats, and compress.",
+              title: "Let AI do the heavy lifting",
+              desc: "Generate subtitles, create a vertical reel from the best moment, or resize for social — all in one click.",
             },
             {
               num: "03",
-              title: "Share or download",
-              desc: "Get shareable links, download processed files, or embed on social platforms.",
+              title: "Download & share",
+              desc: "Grab your processed files, copy a shareable link, or post directly to your favorite platform.",
             },
           ].map((step, i) => (
             <div
@@ -221,8 +226,8 @@ export default function Home() {
               <span className="text-white/40 uppercase tracking-wider text-[10px] sm:text-[11px] mb-1">
                 Product
               </span>
-              <a href="#work" className="text-white/60 hover:text-white transition-colors">Features</a>
-              <a href="#process" className="text-white/60 hover:text-white transition-colors">Process</a>
+              <a href="#features" className="text-white/60 hover:text-white transition-colors">Features</a>
+              <a href="#process" className="text-white/60 hover:text-white transition-colors">How it works</a>
               <Link href="/sign-up" className="text-white/60 hover:text-white transition-colors">Sign up</Link>
             </div>
             <div className="flex flex-col gap-2.5 sm:gap-3">
