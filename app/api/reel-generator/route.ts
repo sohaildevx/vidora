@@ -93,26 +93,29 @@ export async function POST(request: NextRequest) {
       const end = Math.round(parsed.end * 10) / 10;
 
 
+      const transformation = `so_${start},eo_${end}/ar_9:16,c_fill,g_auto/q_auto:low,f_mp4`;
+
       const result = await cloudinary.uploader.explicit(publicId, {
         type: "upload",
         resource_type: "video",
-        eager: [{
-          raw_transformation: `so_${start},eo_${end}/ar_9:16,c_fill,g_auto/q_auto:low,f_mp4`,
-          format: "mp4"
-        }],
-        eager_async: false
+        eager: [{ raw_transformation: transformation }],
+        eager_async: false,
       });
 
-      const reelUrl = cloudinary.url(publicId, {
-        resource_type: "video",
-        transformation: [
-          { start_offset: `${start}`, end_offset: `${end}` },
-          { aspect_ratio: "9:16", crop: "fill", gravity: "auto" },
-          { quality: "auto:low", fetch_format: "mp4" },
-        ],
-        sign_url: true,
-        secure: true,
-      });
+      let reelUrl: string | undefined = result.eager?.[0]?.secure_url;
+
+      if (!reelUrl) {
+       
+        const resourceInfo = await cloudinary.api.resource(publicId, {
+          resource_type: "video",
+          derived: true,
+        });
+
+        const derived = (resourceInfo.derived as any[])?.find((d) =>
+          d.raw_transformation?.startsWith(`so_${start}`)
+        );
+        reelUrl = derived?.secure_url;
+      }
 
       if (!reelUrl) {
         return NextResponse.json(
