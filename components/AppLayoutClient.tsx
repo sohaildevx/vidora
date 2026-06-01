@@ -10,9 +10,9 @@ import {
   LayoutDashboardIcon,
   Share2Icon,
   UploadIcon,
-  ImageIcon,
   Clapperboard
 } from "lucide-react";
+import Image from "next/image";
 
 const sidebarItems = [
   { href: "/home", icon: LayoutDashboardIcon, label: "Home Page" },
@@ -117,8 +117,10 @@ export default function AppLayoutClient({
       <div className="drawer-side">
         <label htmlFor="sidebar-drawer" className="drawer-overlay"></label>
         <aside className="bg-base-200 w-64 h-full flex flex-col">
-          <div className="flex items-center justify-center py-4">
-            <ImageIcon className="w-10 h-10 text-primary" />
+          <div className="flex items-center justify-center py-4 p-4">
+            <div className="bg-black rounded-full p-2 flex items-center justify-center">
+              <Image src="/svgs/logo.svg" alt="Logo" width={40} height={40} className="invert" />
+            </div>
           </div>
           <ul className="menu p-4 w-full text-base-content grow">
             {sidebarItems.map((item) => (
