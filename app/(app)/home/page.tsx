@@ -1,235 +1,33 @@
-"use client"
-import React, {useState, useCallback, useEffect} from 'react'
-import axios from 'axios'
-import VideoCard from '@/components/videoCard'
-import VideoCardSkeleton from '@/components/VideoCardSkeleton'
-import {Video} from '@/types/index'
-import { ShowToast } from '@/components/toast'
-const HomePage = () => {
+import { auth } from '@clerk/nextjs/server'
+import { prisma } from '@/lib/prisma'
+import VideoGrid from '@/components/VideoGrid'
 
-  const [videos, setVideos] = useState<Video[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [generatingSubtitlesId, setGeneratingSubtitlesId] = useState<string | null>(null);
-  const [videoToDelete, setVideoToDelete] = useState<string | null>(null);
-  const [videoToGenerateSubtitles, setVideoToGenerateSubtitles] = useState<{id: string, publicId: string} | null>(null);
-
-  const fetchVideos = useCallback(async () => {
-      try {
-       const response = await axios.get(('/api/video'));
-       if(Array.isArray(response.data)){
-          setVideos(response.data);
-       }else{
-          throw new Error("Unexpected response format");
-       }
-      } catch (error) {
-         const errorMessage = error instanceof Error ? error.message : 'Failed to load videos';
-         setError(errorMessage);
-         ShowToast(errorMessage, 'error');
-      } finally {
-         setLoading(false);
-      }
-  },[])
-  
-  useEffect(()=>{
-     fetchVideos();
-  },[fetchVideos])
-
-   const handleDownload = useCallback(async (url: string, title: string, subtitles?: string | null) => {
-        
-        try {
-            window.open(url, '_blank');
-            
-            if (subtitles) {
-               
-                setTimeout(async () => {
-                    try {
-                        if (subtitles.startsWith('http')) {
-                            
-                            const subResponse = await fetch(subtitles);
-                            const subBlob = await subResponse.blob();
-                            const subBlobUrl = window.URL.createObjectURL(subBlob);
-                            
-                            const link = document.createElement("a");
-                            link.href = subBlobUrl;
-                            link.download = `${title}-subtitles.vtt`;
-                            document.body.appendChild(link);
-                            link.click();
-                            document.body.removeChild(link);
-                            window.URL.revokeObjectURL(subBlobUrl);
-                           
-                        } else {
-                            
-                            const blob = new Blob([subtitles], { type: 'text/vtt' });
-                            const blobUrl = window.URL.createObjectURL(blob);
-                            const link = document.createElement('a');
-                            link.href = blobUrl;
-                            link.download = `${title}-subtitles.vtt`;
-                            document.body.appendChild(link);
-                            link.click();
-                            document.body.removeChild(link);
-                            window.URL.revokeObjectURL(blobUrl);
-                        
-                        }
-                    } catch (err) {
-                        ShowToast('Failed to download subtitles', 'error');
-                    }
-                }, 500);
-            }
-        } catch (error) {
-            ShowToast('Failed to open video', 'error');
-        }
-    }, [])
-
-    const handleDelete = useCallback(async (id: string) => {
-        setVideoToDelete(id);
-    }, [])
-
-    const confirmDelete = useCallback(async () => {
-        if (!videoToDelete) return;
-
-        setDeletingId(videoToDelete);
-        setVideoToDelete(null);
-
-        try {
-            const response = await axios.delete(`/api/video-delete?id=${videoToDelete}`);
-            
-            if (response.data.success) {
-                setVideos(prevVideos => prevVideos.filter(video => video.id !== videoToDelete));
-                ShowToast('Video deleted successfully!', 'success');
-            } else {
-                ShowToast('Failed to delete video. Please try again.', 'error');
-            }
-        } catch (error) {
-            const errorMessage = axios.isAxiosError(error) && error.response?.data?.error 
-                ? error.response.data.error 
-                : 'Failed to delete video. Please try again.';
-            ShowToast(errorMessage, 'error');
-        } finally {
-            setDeletingId(null);
-        }
-    }, [videoToDelete])
-
-    const handleGenerateSubtitles = useCallback(async (videoId: string, publicId: string) => {
-        setVideoToGenerateSubtitles({id: videoId, publicId});
-    }, [])
-
-    const confirmGenerateSubtitles = useCallback(async () => {
-        if (!videoToGenerateSubtitles) return;
-
-        const {id: videoId, publicId} = videoToGenerateSubtitles;
-        setGeneratingSubtitlesId(videoId);
-        setVideoToGenerateSubtitles(null);
-
-        try {
-            const response = await axios.post('/api/subtitle-generator', {
-                videoId,
-                publicId
-            });
-
-            if (response.data.success) {
-                
-                setVideos(prevVideos => 
-                    prevVideos.map(video => 
-                        video.id === videoId 
-                            ? { ...video, hasSubtitles: true, subtitles: response.data.subtitles }
-                            : video
-                    )
-                );
-
-                ShowToast('Subtitles generated successfully!', 'success');
-            } else {
-                ShowToast('Failed to generate subtitles. Please try again.', 'error');
-            }
-        } catch (error) {
-            const errorMessage = axios.isAxiosError(error) && error.response?.data?.error 
-                ? error.response.data.error 
-                : 'Failed to generate subtitles. Please try again.';
-            ShowToast(errorMessage, 'error');
-        } finally {
-            setGeneratingSubtitlesId(null);
-        }
-    }, [videoToGenerateSubtitles])
-
-    if(loading){
-        return (
-            <div className="container mx-auto px-4 py-6 lg:px-6 xl:px-8">
-                <div className="mb-6 lg:mb-8">
-                    <div className="skeleton h-10 w-48 mb-2" />
-                    <div className="skeleton h-5 w-64" />
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 lg:gap-6">
-                    {Array.from({ length: 6 }).map((_, i) => (
-                        <VideoCardSkeleton key={i} />
-                    ))}
-                </div>
-            </div>
-        )
+async function fetchVideos() {
+  try {
+    const { userId } = await auth()
+    
+    if (!userId) {
+      return []
     }
-  return (
-     <>
-      <div className="container mx-auto px-4 py-6 lg:px-6 xl:px-8">
-          <div className="mb-6 lg:mb-8">
-            <h1 className="text-3xl lg:text-4xl xl:text-5xl font-bold mb-2">
-              My Videos
-            </h1>
-            <p className="text-sm lg:text-base text-base-content/70">Manage and share your video library</p>
-          </div>
-          {videos.length === 0 ? (
-            <div className="text-center py-16">
-              <div className="text-5xl lg:text-6xl mb-4">🎬</div>
-              <p className="text-lg lg:text-xl text-gray-500 mb-2">No videos available</p>
-              <p className="text-sm text-gray-400">Upload your first video to get started!</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 lg:gap-6">
-              {
-                videos.map((video) => (
-                    <VideoCard
-                        key={video.id}
-                        publicId={video.publicId}
-                        video={video}
-                        onDownload={handleDownload}
-                        onDelete={handleDelete}
-                        onGenerateSubtitles={handleGenerateSubtitles}
-                        isDeleting={deletingId === video.id}
-                        isGeneratingSubtitles={generatingSubtitlesId === video.id}
-                    />
-                ))
-              }
-            </div>
-          )}
-        </div>
 
-        {videoToDelete && (
-          <div className="modal modal-open">
-            <div className="modal-box w-11/12 max-w-md p-6">
-              <h3 className="font-bold text-lg lg:text-xl mb-2">Confirm Delete</h3>
-              <p className="py-4 text-sm lg:text-base">Are you sure you want to delete this video? This action cannot be undone.</p>
-              <div className="modal-action flex flex-col-reverse sm:flex-row gap-3">
-                <button className="btn btn-ghost btn-md w-full sm:w-auto" onClick={() => setVideoToDelete(null)}>Cancel</button>
-                <button className="btn btn-error btn-md w-full sm:w-auto" onClick={confirmDelete}>Delete</button>
-              </div>
-            </div>
-          </div>
-        )}
+    const videos = await prisma.video.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' }
+    })
 
-        
-        {videoToGenerateSubtitles && (
-          <div className="modal modal-open">
-            <div className="modal-box w-11/12 max-w-md p-6">
-              <h3 className="font-bold text-lg lg:text-xl mb-2">Generate Subtitles</h3>
-              <p className="py-4 text-sm lg:text-base">Generate subtitles for this video? This may take a few minutes.</p>
-              <div className="modal-action flex flex-col-reverse sm:flex-row gap-3">
-                <button className="btn btn-ghost btn-md w-full sm:w-auto" onClick={() => setVideoToGenerateSubtitles(null)}>Cancel</button>
-                <button className="btn btn-primary btn-md w-full sm:w-auto" onClick={confirmGenerateSubtitles}>Generate</button>
-              </div>
-            </div>
-          </div>
-        )}
-      </>
-  )
+    return videos
+  } catch (error) {
+    console.error('Failed to fetch videos:', error)
+    return []
+  }
 }
 
-export default HomePage
+export default async function HomePage() {
+  const videos = await fetchVideos()
+
+  return (
+    <div className="container mx-auto px-4 py-6 lg:px-6 xl:px-8">
+      <VideoGrid initialVideos={videos} />
+    </div>
+  )
+}
