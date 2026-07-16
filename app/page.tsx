@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Home() {
   return (
@@ -6,7 +7,8 @@ export default function Home() {
       
       <header className="fixed top-0 w-full z-50 backdrop-blur-md bg-[#0a0a0a]/90 border-b border-white/10">
         <div className="max-w-[1400px] mx-auto flex items-center justify-between px-4 sm:px-6 md:px-10 h-14 sm:h-16">
-          <Link href="/" className="text-sm sm:text-base tracking-[0.2em] uppercase font-semibold text-white">
+          <Link href="/" className="flex items-center gap-2 text-sm sm:text-base tracking-[0.2em] uppercase font-semibold text-white">
+            <Image src="/svgs/logo.svg" alt="Vidora" width={32} height={32} className="invert" />
             Vidora
           </Link>
           <nav className="hidden md:flex gap-8 text-sm text-white/70">
