@@ -49,9 +49,14 @@ export async function POST(request: NextRequest) {
         format: "mp4",
       });
   
-      const videoResponse = await fetch(videoUrl);
-      if (!videoResponse.ok) {
-        throw new Error("Failed to fetch video from Cloudinary");
+      let videoResponse: Response | null = null;
+      for (let attempt = 1; attempt <= 5; attempt++) {
+        videoResponse = await fetch(videoUrl);
+        if (videoResponse.ok) break;
+        if (attempt < 5) await new Promise(r => setTimeout(r, 2000));
+      }
+      if (!videoResponse || !videoResponse.ok) {
+        throw new Error("Failed to fetch video from Cloudinary after retries");
       }
   
       const videoBlob = await videoResponse.blob();
@@ -85,33 +90,20 @@ export async function POST(request: NextRequest) {
       const end = Math.round(parsed.end * 10) / 10;
 
 
-      const transformation = `so_${start},eo_${end}/ar_9:16,c_fill,g_auto/q_auto:low,f_mp4`;
+      const eagerTransformation = `so_${start},eo_${end}/ar_9:16,c_fill,g_auto/q_auto:low,f_mp4`;
 
       const result = await cloudinary.uploader.explicit(publicId, {
         type: "upload",
         resource_type: "video",
-        eager: [{ raw_transformation: transformation }],
+        eager: [{ raw_transformation: eagerTransformation }],
         eager_async: false,
       });
 
-      let reelUrl: string | undefined = result.eager?.[0]?.secure_url;
-
-      if (!reelUrl) {
-       
-        const resourceInfo = await cloudinary.api.resource(publicId, {
-          resource_type: "video",
-          derived: true,
-        });
-
-        const derived = (resourceInfo.derived as any[])?.find((d) =>
-          d.raw_transformation?.startsWith(`so_${start}`)
-        );
-        reelUrl = derived?.secure_url;
-      }
+      const reelUrl = result.eager?.[0]?.secure_url;
 
       if (!reelUrl) {
         return NextResponse.json(
-          { error: "Failed to get reel URL from Cloudinary." },
+          { error: "Failed to generate reel URL. Please try again." },
           { status: 500 }
         );
       }
@@ -124,8 +116,10 @@ export async function POST(request: NextRequest) {
   
       
     } catch (error) {
+      console.error("Reel generation error:", error);
+      const message = error instanceof Error ? error.message : "Failed to generate reel";
       return NextResponse.json(
-        { error: "Failed to generate reel" },
+        { error: message },
         { status: 500 }
       );
     } finally {
