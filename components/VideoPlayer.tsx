@@ -42,15 +42,17 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
   useEffect(() => {
     if (videoRef.current && blobUrl) {
+      const video = videoRef.current;
       
-      const tracks = videoRef.current.textTracks;
+      const handleLoadedMetadata = () => {
+        const tracks = video.textTracks;
+        if (tracks.length > 0) {
+          tracks[0].mode = 'showing';
+        }
+      };
       
-      if (tracks.length > 0) {
-        tracks[0].mode = 'showing'; 
-        
-        tracks[0].addEventListener('load', () => console.log('✅ Track loaded'));
-        tracks[0].addEventListener('error', (e) => console.error('❌ Track error:', e));
-      }
+      video.addEventListener('loadedmetadata', handleLoadedMetadata);
+      return () => video.removeEventListener('loadedmetadata', handleLoadedMetadata);
     }
   }, [blobUrl]);
 
@@ -66,10 +68,11 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
       >
         <source src={videoUrl} type="video/mp4" />
         
-        {subtitleUrl && (
+        {blobUrl && (
           <track
+            key={blobUrl}
             kind="subtitles"
-            src={subtitleUrl}
+            src={blobUrl}
             srcLang="en"
             label="English"
             default
